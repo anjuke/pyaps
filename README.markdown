@@ -44,11 +44,11 @@ setup(
 
     install_requires = [
         # ...
-        'pyaps==1.2.0.0.dev'
+        'aps==1.2.0.0.dev'
     ],
 
     dependency_links = [
-        'http://git.corp.anjuke.com/_aps/pyaps/archive/master.zip#pyaps-1.2.0.0.dev'
+        'http://git.corp.anjuke.com/_aps/pyaps/archive/master.zip#aps-1.2.0.0.dev'
     ]
 
     # ...
