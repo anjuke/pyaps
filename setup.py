@@ -14,7 +14,7 @@ setup (
     packages = find_packages("src"),
 
     install_requires = [
-        'pyzmq==13.1.0',
+        'pyzmq==14.0.0',
         'msgpack-python==0.3.0'
     ],
 
