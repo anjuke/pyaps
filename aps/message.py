@@ -79,7 +79,9 @@ timestamp: %r
 
         if attr == 'extras':
             if len(self._frames) > self._sep + 5:
-                self.extras = self._frames[self._sep + 5:]
+                self.extras=[]
+                for self._frames[self._sep + 5:] as extra:
+                    self.extras.append(unpackb(extra))
             else:
                 self.extras = None
             return self.extras
@@ -99,7 +101,8 @@ timestamp: %r
         frames.append(self.method)
         frames.append(packb(self.params))
         if self.extras is not None:
-            frames.extend(self.extras)
+            for self.extras as extra:
+                frames.append(packb(extra))
         return frames
 
 class APSReply(object):
@@ -149,7 +152,7 @@ timestamp: %r
             return self.version
 
         if attr == 'sequence' or attr == 'timestamp' or attr == 'status':
-            self.sequence, self.timestamp, self.status = msgpack.unpackb(
+            self.sequence, self.timestamp, self.status = unpackb(
                     self._frames[self._sep + 2])
             if attr == 'sequence':
                 return self.sequence
@@ -159,12 +162,14 @@ timestamp: %r
                 return self.status
 
         if attr == 'result':
-            self.result = msgpack.unpackb(self._frames[self._sep + 3])
+            self.result = unpackb(self._frames[self._sep + 3])
             return self.result
 
         if attr == 'extras':
             if len(self._frames) > self._sep + 4:
-                self.extras = self._frames[self._sep + 4:]
+                self.extras=[]
+                for self._frames[self._sep + 4:] as extra:
+                    self.extras.append(unpackb(extra))
             else:
                 self.extras = None
             return self.extras
@@ -183,5 +188,6 @@ timestamp: %r
         frames.append(packb((self.sequence, self.timestamp, self.status)))
         frames.append(packb(self.result))
         if self.extras is not None:
-            frames.extend(self.extras)
+            for self.extras as extra:
+                frames.append(packb(extra))
         return frames
