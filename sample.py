@@ -1,51 +1,48 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, print_function
+from aps import APS
+from aps.base import wait_for_replies, pending_requests
 
-import aps
 
+
+aps = APS()
 
 # set default timeout
-aps.default_timeout = 0.1
+aps.default_timeout = 100
 
 # connect to an APS endpoint
-aps.connect('tcp://127.0.0.1:8964')
-
-def callback(result, status):
-    print("[{}] {}".format(status, result))
+# aps.connect('tcp://127.0.0.1:8964')
+aps.connect('tcp://192.168.1.62:8964')
 
 # with callback
-hdl1 = aps.start_request(method='time', callback=callback)
+hdl1 = aps.start_request(method='time')
 
 # with parameters
-hdl2 = aps.start_request(method='echo', 'Hello World')
-hdl3 = aps.start_request(method='sleep', 2)
+hdl2 = aps.start_request(method='echo', params=['Hello World'])
+# hdl3 = aps.start_request(method='sleep', params=[1.1])
 
-hdl4 = aps.start_request(method='time')
+hdl3 = aps.start_request(method='time')
 
-for i in range(100):
+for i in range(50):
     aps.start_request(method='time')
 
 # 10ms for first reply
-replies = aps.wait_for_replies(hdl1, timeout=0.01)
+replies = wait_for_replies(hdl1, timeout=10)
 print(replies)
 
 # default timeout
-replies = aps.wait_for_replies(hdl2, hdl4)
+replies = wait_for_replies(hdl2, hdl3)
 print(replies)
 
 # return already received replies without wait
-replies = aps.wait_for_replies(timeout=0)
+replies = wait_for_replies(timeout=0)
 print(replies)
 
 # wait for another 100ms
-replies = aps.wait_for_replies()
+replies = wait_for_replies()
 print(replies)
 
-def check_status(result, status):
-    if status == 200:
-        print(result)
+aps.start_request(method='.status')
 
-aps.start_request(method='.status', callback=check_status)
-
-replies = aps.wait_for_replies(timeout=-1)
+replies = wait_for_replies(timeout=-1)
 print(replies)

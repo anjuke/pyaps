@@ -1,24 +1,30 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+from time import time
 
 from msgpack import packb, unpackb
 
-from aps.base import get_timestamp, get_uuid
-from aps.version import APS_VERSION
+from aps._compat import str_types, bytes_types
 
-EMPTY = b''
+
+
+VERSION = r'APS1.2'
+EMPTY = r''
 
 class APSRequest(object):
+    """Base APS Request messsage class
+    """
+
     def __init__(self, frames=None, **kwargs):
         if frames:
             self._frames = frames
             try:
                 self._sep = frames.index(EMPTY)
             except:
-                self._sep = 0
+                self._sep = -1
             return
+
         self.envelope  = kwargs.pop('envelope', None)
-        self.version   = kwargs.pop('version', APS_VERSION)
+        self.version   = kwargs.pop('version', VERSION)
         self.sequence  = kwargs.pop('sequence', None)
         self.timestamp = kwargs.pop('timestamp', None)
         self.expiry    = kwargs.pop('expiry', None)
@@ -26,21 +32,25 @@ class APSRequest(object):
         self.params    = kwargs.pop('params', None)
         self.extras    = kwargs.pop('extras', None)
 
-    def __repr__(self):
-        return '''Request:
-  envelop: %r
-   vesion: %r
- sequence: %r
-timestamp: %r
-   expiry: %r
-   method: %r
-   params: %r
-   extras: %r''' % (
-       self.envelope,
-       self.version,
-       self.sequence, self.timestamp, self.expiry,
-       self.method, self.params,
-       self.extras)
+    def __repr(self):
+        return '''<#APSRequest {} {} {}>'''.format(self.sequence[:7],
+                                                   self.method, self.status)
+
+    def inspect(self):
+        return '''APSRequest:
+   envelope: %r
+    version: %r
+   sequence: %r
+  timestamp: %r
+     expiry: %r
+     method: %r
+     params: %r
+     extras: %r''' % (
+        self.envelope,
+        self.version,
+        self.sequence, self.timestamp, self.expiry,
+        self.method, self.params,
+        self.extras)
 
     def __getattr__(self, attr):
         assert self._frames
@@ -56,12 +66,9 @@ timestamp: %r
             self.version = self._frames[self._sep + 1]
             return self.version
 
-        if attr in ('sequence', 'timestamp', 'expiry'):
-            print self._sep
-            print self._frames[self._sep + 2]
+        if attr == 'sequence' or attr == 'timestamp' or attr == 'expiry':
             self.sequence, self.timestamp, self.expiry = unpackb(
-                self._frames[self._sep + 2])
-
+                    self._frames[self._sep + 2])
             if attr == 'sequence':
                 return self.sequence
             if attr == 'timestamp':
@@ -79,8 +86,8 @@ timestamp: %r
 
         if attr == 'extras':
             if len(self._frames) > self._sep + 5:
-                self.extras=[]
-                for extra in self._frames[self._sep + 5:]:
+                self.extras = []
+                for extra in self._frames[self._sep + 5]:
                     self.extras.append(unpackb(extra))
             else:
                 self.extras = None
@@ -95,33 +102,36 @@ timestamp: %r
             frames = self.envelope[:]
             frames.append(EMPTY)
         else:
-            frames = []
+            frames = [EMPTY]
         frames.append(self.version)
-        frames.append(packb((self.sequence, self.timestamp, self.expiry)))
-        frames.append(self.method)
+        frames.append(packb((self.sequence, self.timestamp,
+                                     self.expiry)))
+        if type(self.method) in str_types:
+            _method = self.method.encode('UTF-8')
+            frames.append(_method)
+        else:
+            frames.append(self.method)
         frames.append(packb(self.params))
         if self.extras is not None:
             for extra in self.extras:
                 frames.append(packb(extra))
         return frames
 
-    @property
-    def id(self):
-        '''alias of sequence
-        '''
-        return self.sequence
-
 class APSReply(object):
+    """Base APS Reply message class
+    """
+
     def __init__(self, frames=None, **kwargs):
         if frames:
             self._frames = frames
             try:
                 self._sep = frames.index(EMPTY)
             except:
-                self._sep = 0
+                self._sep = -1
             return
+
         self.envelope  = kwargs.pop('envelope', None)
-        self.version   = kwargs.pop('version', APS_VERSION)
+        self.version   = kwargs.pop('version', VERSION)
         self.sequence  = kwargs.pop('sequence', None)
         self.timestamp = kwargs.pop('timestamp', None)
         self.status    = kwargs.pop('status', None)
@@ -129,19 +139,23 @@ class APSReply(object):
         self.extras    = kwargs.pop('extras', None)
 
     def __repr__(self):
-        return '''Reply:
-  envelop: %r
-   vesion: %r
- sequence: %r
-timestamp: %r
-   status: %r
-   result: %r
-   extras: %r''' % (
-       self.envelope,
-       self.version,
-       self.sequence, self.timestamp, self.status,
-       self.result,
-       self.extras)
+        return '''<#APSReply {} {}>'''.format(self.sequence[:7],
+                                              self.status)
+
+    def inspect(self):
+        return '''APSReply:
+   envelope: %r
+    version: %r
+   sequence: %r
+  timestamp: %r
+     status: %r
+     result: %r
+     extras: %r''' % (
+        self.envelope,
+        self.version,
+        self.sequence, self.timestamp, self.status,
+        self.result,
+        self.extras)
 
     def __getattr__(self, attr):
         assert self._frames
@@ -173,8 +187,8 @@ timestamp: %r
 
         if attr == 'extras':
             if len(self._frames) > self._sep + 4:
-                self.extras=[]
-                for extra in self._frames[self._sep + 4:]:
+                self.extras = []
+                for extra in self._frames[self._sep + 4]:
                     self.extras.append(unpackb(extra))
             else:
                 self.extras = None
@@ -187,11 +201,12 @@ timestamp: %r
 
         if self.envelope is not None:
             frames = self.envelope[:]
-            frames.append(EMPTY)
+            frames.append(r'')
         else:
             frames = []
         frames.append(self.version)
-        frames.append(packb((self.sequence, self.timestamp, self.status)))
+        frames.append(packb((self.sequence, self.timestamp,
+                                     self.status)))
         frames.append(packb(self.result))
         if self.extras is not None:
             for extra in self.extras:
