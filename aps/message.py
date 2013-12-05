@@ -105,6 +105,12 @@ timestamp: %r
                 frames.append(packb(extra))
         return frames
 
+    @property
+    def id(self):
+        '''alias of sequence
+        '''
+        return self.sequence
+
 class APSReply(object):
     def __init__(self, frames=None, **kwargs):
         if frames:

@@ -126,9 +126,9 @@ class APSClient(object):
         """
         expire = expire or APSClient.DEFAULT_TIMEOUT
 
-        message = APSRequest(method, params, expire)
+        message = APSRequest(method=method, params=params, expire=expire)
 
         if type(extra_frames) == list and extra_frames:
-            message.extra_frames = extra_frames
+            message.extra = extra_frames
         send_message(self.socket, message)
         return message.id
