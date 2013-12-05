@@ -80,7 +80,7 @@ timestamp: %r
         if attr == 'extras':
             if len(self._frames) > self._sep + 5:
                 self.extras=[]
-                for self._frames[self._sep + 5:] as extra:
+                for extra in self._frames[self._sep + 5:]:
                     self.extras.append(unpackb(extra))
             else:
                 self.extras = None
@@ -101,7 +101,7 @@ timestamp: %r
         frames.append(self.method)
         frames.append(packb(self.params))
         if self.extras is not None:
-            for self.extras as extra:
+            for extra in self.extras:
                 frames.append(packb(extra))
         return frames
 
@@ -174,7 +174,7 @@ timestamp: %r
         if attr == 'extras':
             if len(self._frames) > self._sep + 4:
                 self.extras=[]
-                for self._frames[self._sep + 4:] as extra:
+                for extra in self._frames[self._sep + 4:]:
                     self.extras.append(unpackb(extra))
             else:
                 self.extras = None
@@ -194,6 +194,6 @@ timestamp: %r
         frames.append(packb((self.sequence, self.timestamp, self.status)))
         frames.append(packb(self.result))
         if self.extras is not None:
-            for self.extras as extra:
+            for extra in self.extras:
                 frames.append(packb(extra))
         return frames

@@ -11,7 +11,7 @@ setup (
     version=version,
     url='http://git.corp.anjuke.com/_aps/pyaps',
     author = "Anjuke Inc.",
-    anthor_email='webmaster@anjuke.com',
+    author_email='webmaster@anjuke.com',
     packages=['aps'],
     platforms='any',
     description = "Python APS client libarary",
