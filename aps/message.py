@@ -7,7 +7,7 @@ from aps._compat import str_types, bytes_types
 
 
 
-VERSION = r'APS1.2'
+VERSION = r'APS12'
 EMPTY = r''
 
 class APSRequest(object):
