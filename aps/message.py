@@ -33,7 +33,7 @@ class APSRequest(object):
         self.extras    = kwargs.pop('extras', None)
 
     def __repr(self):
-        return '''<#APSRequest {} {} {}>'''.format(self.sequence[:7],
+        return '''<#APSRequest {} {} {}>'''.format(self.sequence,
                                                    self.method, self.status)
 
     def inspect(self):
@@ -139,7 +139,7 @@ class APSReply(object):
         self.extras    = kwargs.pop('extras', None)
 
     def __repr__(self):
-        return '''<#APSReply {} {}>'''.format(self.sequence[:7],
+        return '''<#APSReply {} {}>'''.format(self.sequence,
                                               self.status)
 
     def inspect(self):
