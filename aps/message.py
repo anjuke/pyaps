@@ -87,7 +87,7 @@ class APSRequest(object):
         if attr == 'extras':
             if len(self._frames) > self._sep + 5:
                 self.extras = []
-                for extra in self._frames[self._sep + 5]:
+                for extra in self._frames[self._sep + 5:]:
                     self.extras.append(unpackb(extra))
             else:
                 self.extras = None
@@ -188,7 +188,7 @@ class APSReply(object):
         if attr == 'extras':
             if len(self._frames) > self._sep + 4:
                 self.extras = []
-                for extra in self._frames[self._sep + 4]:
+                for extra in self._frames[self._sep + 4:]:
                     self.extras.append(unpackb(extra))
             else:
                 self.extras = None
