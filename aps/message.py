@@ -3,12 +3,13 @@ from time import time
 
 from msgpack import packb, unpackb
 
-from aps._compat import str_types, bytes_types
+
+from aps.util import ensure_bytes, get_timestamp
 
 
 
-VERSION = r'APS12'
-EMPTY = r''
+VERSION = b'APS12'
+EMPTY = b''
 
 class APSRequest(object):
     """Base APS Request messsage class
@@ -23,18 +24,21 @@ class APSRequest(object):
                 self._sep = -1
             return
 
-        self.envelope  = kwargs.pop('envelope', None)
+        self.envelope  = kwargs.pop('envelope', [])
+        # avoid wierd attribute issue in __getattr__
+        assert type(self.envelope) == list
         self.version   = kwargs.pop('version', VERSION)
         self.sequence  = kwargs.pop('sequence', None)
-        self.timestamp = kwargs.pop('timestamp', None)
+        self.timestamp = kwargs.pop('timestamp', get_timestamp())
         self.expiry    = kwargs.pop('expiry', None)
         self.method    = kwargs.pop('method', None)
         self.params    = kwargs.pop('params', None)
         self.extras    = kwargs.pop('extras', None)
 
-    def __repr(self):
+    def __repr__(self):
         return '''<#APSRequest {} {} {}>'''.format(self.sequence,
-                                                   self.method, self.status)
+                                                   self.method,
+                                                   self.params)
 
     def inspect(self):
         return '''APSRequest:
@@ -53,8 +57,6 @@ class APSRequest(object):
         self.extras)
 
     def __getattr__(self, attr):
-        assert self._frames
-
         if attr == 'envelope':
             if self._sep >= 0:
                 self.envelope = self._frames[:self._sep]
@@ -93,11 +95,11 @@ class APSRequest(object):
                 self.extras = None
             return self.extras
 
+        raise AttributeError('APSRequest has no attribute {}'.format(attr))
+
+
     @property
     def frames(self):
-        if hasattr(self, '_frames'):
-            return self._frames
-
         if self.envelope is not None:
             frames = self.envelope[:]
             frames.append(EMPTY)
@@ -105,12 +107,8 @@ class APSRequest(object):
             frames = [EMPTY]
         frames.append(self.version)
         frames.append(packb((self.sequence, self.timestamp,
-                                     self.expiry)))
-        if type(self.method) in str_types:
-            _method = self.method.encode('UTF-8')
-            frames.append(_method)
-        else:
-            frames.append(self.method)
+                             self.expiry)))
+        frames.append(ensure_bytes(self.method))
         frames.append(packb(self.params))
         if self.extras is not None:
             for extra in self.extras:
@@ -130,10 +128,12 @@ class APSReply(object):
                 self._sep = -1
             return
 
-        self.envelope  = kwargs.pop('envelope', None)
+        self.envelope  = kwargs.pop('envelope', [])
+        # avoid wierd attribute issue in __getattr__
+        assert type(self.envelope) == list
         self.version   = kwargs.pop('version', VERSION)
         self.sequence  = kwargs.pop('sequence', None)
-        self.timestamp = kwargs.pop('timestamp', None)
+        self.timestamp = kwargs.pop('timestamp', get_timestamp())
         self.status    = kwargs.pop('status', None)
         self.result    = kwargs.pop('result', None)
         self.extras    = kwargs.pop('extras', None)
@@ -158,7 +158,6 @@ class APSReply(object):
         self.extras)
 
     def __getattr__(self, attr):
-        assert self._frames
 
         if attr == 'envelope':
             if self._sep >= 0:
@@ -194,6 +193,8 @@ class APSReply(object):
                 self.extras = None
             return self.extras
 
+        raise AttributeError('APSReply has no attribute {}'.format(attr))
+
     @property
     def frames(self):
         if hasattr(self, '_frames'):
@@ -201,7 +202,7 @@ class APSReply(object):
 
         if self.envelope is not None:
             frames = self.envelope[:]
-            frames.append(r'')
+            frames.append(EMPTY)
         else:
             frames = []
         frames.append(self.version)
