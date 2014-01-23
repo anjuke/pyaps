@@ -17,6 +17,6 @@ setup (
     description = "Python APS client libarary",
     install_requires=[
         'pyzmq==14.0.0',
-        'msgpack-python==0.3.0'
+        'msgpack-python==0.4.0'
     ],
 )
