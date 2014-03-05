@@ -111,3 +111,9 @@ def wait_for_replies(*handlers, **kwargs):
     #     reply, callback = _
     #     callback(reply)
     return rv
+
+def fetch_reply(seq):
+    if seq in pending_replies:
+        rv = pending_replies.pop(seq)
+        del pending_requests[seq]
+        return rv[0]

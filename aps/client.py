@@ -33,13 +33,13 @@ class APS(object):
         self._sock = _sock
         return _sock
 
-    def start_request(self, method, callback=None, params=None):
+    def start_request(self, method, params=[], callback=None):
         """send an APS request to corespanding endpoint
 
         Args:
             +method+ the method namel see APS spec
-            +callback+ register a callback when ready
             +*params+ the parameter list, in order
+            +callback+ register a callback when ready
         """
         uuid = get_uuid()
         request = APSRequest(method=method, params=params, sequence=uuid)

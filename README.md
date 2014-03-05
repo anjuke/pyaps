@@ -9,11 +9,13 @@ Version 1.2
 ```python
 # -*- coding: utf-8 -*-
 from __future__ import print_function, unicode_literals
-from aps import APSClient
-from aps.client import wait_for_replies, fetch_reply
+from aps.client import APS
+from aps.base import wait_for_replies, fetch_reply
 
-bayes_client = APSClient("tcp://10.10.3.46:51000")
-mss_client = APSClient("tcp://10.10.3.46:6000")
+bayes_client = APS()
+bayes_client.connect("tcp://10.10.3.46:51000")
+mss_client = APS()
+mss_client.connect("tcp://10.10.3.46:6000")
 
 bayes_seq = bayes_client.start_request("bayes->guess_all", ["hz_prop", "未来资产大厦"])
 mss_seq = mss_client.start_request("search", ["浦东两室精装修","ac"])
