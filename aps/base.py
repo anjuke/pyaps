@@ -12,7 +12,6 @@ from aps.util import get_timestamp
 default_timeout = 100
 sockets = set()
 pending_requests = {}
-pending_replies = {}
 
 poller = zmq.Poller()
 
@@ -56,14 +55,6 @@ def wait_for_replies(*handlers, **kwargs):
     else:
         pending = set(handlers)
 
-    # already recevied
-    for i in pending.copy():
-        if i in pending_replies:
-            reply, _ = pending_replies.get(i)
-            rv[reply.sequence] = reply
-            pending.remove(i)
-            pending_requests.pop(reply.sequence)
-
     timelimit = True
     if timeout == -1:
         timelimit = False
@@ -79,8 +70,6 @@ def wait_for_replies(*handlers, **kwargs):
                 rv[reply.sequence] = reply
             pending.remove(reply.sequence)
             pending_requests.pop(reply.sequence)
-        else:
-            pending_replies[reply.sequence] = (reply, callback)
 
     while len(pending) > 0:
         _start = get_timestamp()
@@ -111,9 +100,3 @@ def wait_for_replies(*handlers, **kwargs):
     #     reply, callback = _
     #     callback(reply)
     return rv
-
-def fetch_reply(seq):
-    if seq in pending_replies:
-        rv = pending_replies.pop(seq)
-        del pending_requests[seq]
-        return rv[0]

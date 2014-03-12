@@ -10,7 +10,7 @@ Version 1.2
 # -*- coding: utf-8 -*-
 from __future__ import print_function, unicode_literals
 from aps.client import APS
-from aps.base import wait_for_replies, fetch_reply
+from aps.base import wait_for_replies
 
 bayes_client = APS()
 bayes_client.connect("tcp://10.10.3.46:51000")
@@ -20,12 +20,14 @@ mss_client.connect("tcp://10.10.3.46:6000")
 bayes_seq = bayes_client.start_request("bayes->guess_all", ["hz_prop", "未来资产大厦"])
 mss_seq = mss_client.start_request("search", ["浦东两室精装修","ac"])
 
-wait_for_replies(600)
+replies = wait_for_replies(timeout=600)
 
-bayes_rep = fetch_reply(bayes_seq)
-mss_rep = fetch_reply(mss_seq)
-print(bayes_rep)
-print(mss_rep)
+if bayes_seq in replies:
+    bayes_rep = replies.get(bayes_seq)
+    print(bayes_rep)
+if mss_seq in replies:
+    mss_rep = replies.get(mss_seq)
+    print(mss_rep)
 ```
 
 ## Quick Start
