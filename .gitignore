@@ -1,5 +1,5 @@
-*.pyc
-*.pyo
+*.py[co]
 *~
 
 *.egg-info
+.virtualenv/
