@@ -12,6 +12,8 @@ class APS(object):
     """APS Client class
     """
 
+    seq = 1
+
     def __init__(self):
         self._ctx = zmq.Context()
         self.poller = zmq.Poller()
@@ -33,7 +35,8 @@ class APS(object):
         self._sock = _sock
         return _sock
 
-    def start_request(self, method, params=[], callback=None):
+    def start_request(self, method, params=[], callback=None, expiry=0,
+                      extras=None):
         """send an APS request to corespanding endpoint
 
         Args:
@@ -41,8 +44,14 @@ class APS(object):
             +*params+ the parameter list, in order
             +callback+ register a callback when ready
         """
-        uuid = get_uuid()
-        request = APSRequest(method=method, params=params, sequence=uuid)
+        request = APSRequest(method=method, params=params,
+                             sequence=APS.next_seq(),
+                             expiry=expiry, extras=extras)
         pending_requests[request.sequence] = (request, callback)
         aps_send_frames(self._sock, request.frames)
         return request.sequence
+
+    @staticmethod
+    def next_seq():
+        APS.seq += 1
+        return APS.seq
