@@ -12,7 +12,7 @@ class APS(object):
     """APS Client class
     """
 
-    seq = 1
+    seq = 0
 
     def __init__(self):
         self._ctx = zmq.Context()
